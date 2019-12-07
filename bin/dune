@@ -1,0 +1,11 @@
+(executable
+ (public_name rocket_equation)
+ (name rocket_equation)
+ (modules rocket_equation)
+ (libraries aoc base core ounit2))
+
+(executable
+ (public_name program_alarm)
+ (name program_alarm)
+ (modules program_alarm)
+ (libraries aoc base core ounit2))
