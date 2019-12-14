@@ -10,25 +10,23 @@ let command = Command.basic ~summary:"Compute Manhattan distance with inputs fro
          fun () ->
            let f = Filename.realpath filename in
            In_channel.with_file f ~f:(fun file ->
-               let direction_codes =
-                 In_channel.input_lines file
-                 |> List.map ~f:(String.split ~on:',')
-                 |> List.map ~f:(List.map ~f:direction_code_of_string)
+               let line1 = In_channel.input_line_exn file |> String.split ~on:',' in
+               let line2 = In_channel.input_line_exn file |> String.split ~on:',' in
+               let direction_codes1 = List.map line1 ~f:direction_code_of_string in
+               let direction_codes2 = List.map line2 ~f:direction_code_of_string in
+               let intersections = find_intersections (create_moves direction_codes1) (create_moves direction_codes2) in
+               let distances = List.map intersections ~f:(fun (x, y, _) -> manhattan_distance (x, y) Grid.origin)
+                               |> List.sort ~compare:Int.compare
                in
-               let gs = direction_codes |> List.map ~f:grid_of_direction_codes in
-               let steps_to_first_intersection = find_first_intersection
-                   (List.nth_exn direction_codes 0)
-                   (List.nth_exn direction_codes 1)
+               let steps_to_first_intersection = match intersections with
+                 | (_, _, n)::_ -> n
+                 | _ -> 0
                in
-               match gs with
-               | g1::g2::_ ->
-                 begin match Grid.manhattan_distance g1 g2 with
-                   | Some d -> Printf.printf "distance to closest intersection: %d\n" d;
-                     Printf.printf "distance to first intersection: %d\n"
-                       steps_to_first_intersection
-                   | None -> Stdio.print_endline "no distance"
-                 end
-               | _ -> Stdio.prerr_endline "no enough grids"
+               match distances with
+               | d::_ -> Printf.printf "distance to closest intersection: %d\n" d;
+                 Printf.printf "distance to first intersection: %d\n"
+                   steps_to_first_intersection
+               | [] -> Stdio.print_endline "no distance"
              )))
 
 let () = Command.run ~version:"0.1" ~build_info:"AoC" command

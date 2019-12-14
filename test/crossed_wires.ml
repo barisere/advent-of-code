@@ -24,33 +24,23 @@ let test_parse_direction_codes line_input expected_code _ =
     expected_code
     direction_code
 
-let test_grid_of_direction_code _ =
-  let first_wire_code = direction_code_of_input "R8,U5,L5,D3" in
-  let second_wire_code = direction_code_of_input "U7,R6,D4,L4" in
-  let grid = grid_of_direction_codes first_wire_code in
-  let grid' = grid_of_direction_codes second_wire_code in
-  let grid_intersections = Grid.intersection grid grid' in
-  match grid_intersections with
-  | h::_ -> assert_equal ~msg:"First intesection should be (4,4)" h (4, 4)
-  | _ -> OUnitAssert.assert_failure "Did not find intersection (3,3)"
-
 let test_manhattan_distance wire_code_1 wire_code_2 expected_distance _ =
   let first_wire_code = direction_code_of_input wire_code_1 in
   let second_wire_code = direction_code_of_input wire_code_2 in
-  let grid = grid_of_direction_codes first_wire_code in
-  let grid' = grid_of_direction_codes second_wire_code in
-  match Grid.manhattan_distance grid grid' with
-  | Some d -> assert_equal
+  let moves = create_moves first_wire_code in
+  let moves' = create_moves second_wire_code in
+  let distances = List.map (find_intersections moves moves') ~f:(fun (x,y,_) ->
+      manhattan_distance (x,y) coordinate_origin) |> List.sort ~compare:Int.compare
+  in
+  match distances with
+  | d::_ -> assert_equal
                 ~msg:(Printf.sprintf "Expected manhattan distance %d, got %d" expected_distance d)
                 expected_distance d
-  | None -> OUnitAssert.assert_failure "Got None for manhattan distance"
+  | [] -> OUnitAssert.assert_failure "Got None for manhattan distance"
 
 let parse_suite = "Computing intersection point of wires closes to a central point" >::: [
     "Parsing direction codes maps each code to a tuple (direction label * displacement)" >::
     test_parse_direction_codes first_wire first_wire_code;
-
-    "Grid from direction codes has each point on line path set" >::
-    test_grid_of_direction_code
   ]
 
 let manhattan_distance_suite = "Manhattan distance on a grid" >::: [
@@ -70,10 +60,12 @@ let manhattan_distance_suite = "Manhattan distance on a grid" >::: [
 let test_first_intersection first_wire second_wire expected_moves _ =
   let first_code = direction_code_of_input first_wire in
   let second_code = direction_code_of_input second_wire in
-  let n_moves = find_first_intersection first_code second_code in
-  Printf.printf "Expected %d, got %d" expected_moves n_moves;
-  assert_equal n_moves expected_moves ~msg:
-    "Intersection found after unexpected number of moves"
+  let n_moves = find_intersections (create_moves first_code) (create_moves second_code) in
+  match n_moves with
+  | (_, _, n)::_ ->
+    assert_equal n expected_moves ~msg:
+      "Intersection found after unexpected number of moves"
+  | _ -> OUnitAssert.assert_failure "Intersection found after unexpected number of moves"
 
 let intersection_suite =
   "Finding the fewest number of moves until wires intersect" >::: [
@@ -85,7 +77,10 @@ let intersection_suite =
     "Example 2" >:: test_first_intersection
       "R98,U47,R26,D63,R33,U87,L62,D20,R33,U53,R51"
       "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"
-      410
+      410;
+
+    "Example 3" >:: test_first_intersection
+      "R8,U5,L5,D3" "U7,R6,D4,L4" 30
   ]
 let () =
   run_test_tt_main parse_suite;

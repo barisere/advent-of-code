@@ -4,6 +4,7 @@ lib: [
   "_build/install/default/lib/aoc/opam"
 ]
 bin: [
+  "_build/install/default/bin/crossed_wires"
   "_build/install/default/bin/program_alarm"
   "_build/install/default/bin/rocket_equation"
 ]

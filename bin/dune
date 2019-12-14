@@ -9,3 +9,9 @@
  (name program_alarm)
  (modules program_alarm)
  (libraries aoc base core ounit2))
+
+(executable
+ (name        crossed_wires)
+ (public_name crossed_wires)
+ (modules     crossed_wires)
+ (libraries   aoc base core ounit2))
