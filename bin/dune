@@ -15,3 +15,9 @@
  (public_name crossed_wires)
  (modules     crossed_wires)
  (libraries   aoc base core ounit2))
+
+(executable
+ (name        elves_password)
+ (public_name elves_password)
+ (modules     elves_password)
+ (libraries   aoc))

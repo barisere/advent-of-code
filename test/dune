@@ -1,5 +1,5 @@
 (tests
- (names rocket_equation program_alarm crossed_wires)
+ (names rocket_equation program_alarm crossed_wires elves_password)
  (libraries aoc base core ounit2)
  (preprocess
   (pps ppx_sexp_conv ppx_deriving)))
